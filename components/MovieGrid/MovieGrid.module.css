@@ -1,0 +1,23 @@
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Центруємо карточки по горизонталі */
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.card {
+  cursor: pointer;
+  width: 200px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
