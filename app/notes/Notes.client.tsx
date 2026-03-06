@@ -14,30 +14,45 @@ interface NotesClientProps {
 }
 
 export default function NotesClient({ initialData }: NotesClientProps) {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [page, setPage] = useState<number>(1);
+  const [search, setSearch] = useState<string>("");
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  const queryParams: FetchNotesParams = { page, perPage: 12, search };
+  // Параметри для API (зараз вони опціональні)
+  const perPage = 12;
+  const queryParams: FetchNotesParams = { page, perPage, search };
 
-  const { data } = useQuery<FetchNotesResponse>({
-    queryKey: ["notes", page, search],
-    queryFn: () => fetchNotes(queryParams),
-    initialData,
-  });
+// …
+const { data = initialData } = useQuery<FetchNotesResponse>({
+  queryKey: ["notes", page, search],
+  queryFn: () => fetchNotes(queryParams),
+  initialData,
+});
+
+// Використовуємо масив notes
+const filteredNotes = data.notes.filter(note =>
+  note.title.toLowerCase().includes(search.toLowerCase())
+);
+
+const paginatedNotes = filteredNotes.slice((page - 1) * perPage, page * perPage);
+const totalPages = Math.ceil(filteredNotes.length / perPage);
+
 
   return (
     <div>
       <SearchBox onSearch={setSearch} />
       <button onClick={() => setModalOpen(true)}>Create Note</button>
+
       {modalOpen && (
         <Modal onClose={() => setModalOpen(false)}>
           <NoteForm onClose={() => setModalOpen(false)} />
         </Modal>
       )}
-      {data && <NoteList notes={data.notes} />}
-      {data && data.totalPages > 1 && (
-        <Pagination totalPages={data.totalPages} page={page} onPageChange={setPage} />
+
+      <NoteList notes={paginatedNotes} />
+
+      {totalPages > 1 && (
+        <Pagination totalPages={totalPages} page={page} onPageChange={setPage} />
       )}
     </div>
   );
